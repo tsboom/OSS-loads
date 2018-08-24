@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import os.path
 import time
-from subprocess import Popen, PIPE
+from subprocess import call, Popen, PIPE
 import csv
+from collections import OrderedDict
+import sys
 import pdb
 import re
+import pprint
 # debugging: insert  pdb.set_trace() to set breakpoint
 
 # get filename argument from the shell (ex: python oss-load.py filename.csv)
@@ -12,29 +15,36 @@ csv_file = sys.argv[1]
 
 # open csv file for checking
 f = open(csv_file)
-reader = csv.DictReader(f)
-
-#skip first line
-reader.readline()
+reader = csv.reader(f)
+# skip headers
+next(reader, None)
 
 # functions that do basic checks to figure out which fields are provided
 def is_barcode(value):
     regex = r"[0-9]{14}"
     if re.search(regex, value):
-        return true
+        return True
 
 def is_rmst(value):
     regex = r"R[0-9]{2}M[0-9]{2}S[0-9]{2}T[0-9]{2}"
     if re.search(regex, value):
-        return true
+        return True
         
 # variable to describe the type of CSV after it is checked
 csv_type = ""
+
+# variable to hold the ordered dictionary version of the CSV
+csv_dict = []
 for row in reader: 
+    csv_dict.append(row)
+
+# iterate over rows in the new csv dict
+pp = pprint.PrettyPrinter(indent=4)
+for row in csv_dict:
+    pp.pprint(row)
+    print "row length is: " + str(len(row))
     if len(row) > 5:
         print "Error: There are too many columns. Please check the data and try again."
-        f.close()
-        break
     elif len(row) == 5 and is_rmst(row[0]):
         # check to make sure size is valid
         valid_sizes = ['A', 'B', 'C', 'D', 'E', 'M', 'O', 'P', 'U']
@@ -48,33 +58,41 @@ for row in reader:
         csv_type = "barcode, RMST, title"
     else: 
         print "Error: There is a problem with the CSV file. Please check the data and try again."
+    f.close()
+    break
+    
+print "CSV type: " + csv_type
 
 # set up SQL file
 # name the SQL file the same name as the CSV, but with a .sql extension
-filename_no_ext = os.path.splittext(csv_file)[0]
+filename_no_ext = os.path.splitext(csv_file)[0]
 sql_file = filename_no_ext + '.sql'
 f = open(sql_file, "w")
+print "sql_file: " + sql_file
 
 # function to run build_sql script on the csv_file using subprocess
 def build_sql(scriptname, csv_file):
     subprocess.call(["./"+scriptname, csv_file], stdout=f)
 
 # build SQL using the build_sql script which corresponds to csv_type
-if csv_type = "barcode, RMST, title":
+if csv_type == "barcode, RMST, title":
     build_sql('build_sql_0307a', csv_file)
-if csv_type = "RMST, full, size, height, source":
+if csv_type == "RMST, full, size, height, source":
     build_sql('build_sql_0307b', csv_file)
-if csv_type = "barcode, title, author, call number":
+if csv_type == "barcode, title, author, call number":
     build_sql('build_sql_0314', csv_file)
     
 # check if SQL file exists 
 while not os.path.exists(sql_file):
+    print "Waiting for SQL file..."
     time.sleep(1)
 
 if os.path.isfile(sql_file):
+    print "Opening SQL Plus"
     # opens Sql plus session
-    session = Popen([‘s+’,’moss’], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    session = Popen(['s+','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     session.stdin.write('set feedback off;')
+    print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';')
     # communicate results to stdout
     stdout, stderr = session.communicate()
