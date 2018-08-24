@@ -59,7 +59,7 @@ f = open(sql_file, "w")
 def build_sql(scriptname, csv_file):
     subprocess.call(["./"+scriptname, csv_file], stdout=f)
 
-# build SQL for barcode, RMST, title
+# build SQL using the build_sql script which corresponds to csv_type
 if csv_type = "barcode, RMST, title":
     build_sql('build_sql_0307a', csv_file)
 if csv_type = "RMST, full, size, height, source":
@@ -74,6 +74,10 @@ while not os.path.exists(sql_file):
 if os.path.isfile(sql_file):
     # opens Sql plus session
     session = Popen([‘s+’,’moss’], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    session.stdin.write('set feedback off;')
     session.stdin.write('@'+ filename_no_ext +';')
+    # communicate results to stdout
+    stdout, stderr = session.communicate()
+    
 else:
     raise ValueError("%s isn't a file!" % file_path)
