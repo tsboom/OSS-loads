@@ -3,7 +3,6 @@ import os.path
 import time
 from subprocess import call, Popen, PIPE
 import csv
-from collections import OrderedDict
 import sys
 import pdb
 import re
@@ -41,8 +40,9 @@ for row in reader:
 # iterate over rows in the new csv dict
 pp = pprint.PrettyPrinter(indent=4)
 for row in csv_dict:
-    pp.pprint(row)
-    print "row length is: " + str(len(row))
+    print ".........."
+    pp.pprint(row) 
+    print "\n\nrow length is: " + str(len(row)) +"\n\n"
     if len(row) > 5:
         print "Error: There are too many columns. Please check the data and try again."
     elif len(row) == 5 and is_rmst(row[0]):
@@ -61,26 +61,30 @@ for row in csv_dict:
     f.close()
     break
     
-print "CSV type: " + csv_type
+print "CSV type: " + csv_type + "\n\n" 
 
 # set up SQL file
 # name the SQL file the same name as the CSV, but with a .sql extension
 filename_no_ext = os.path.splitext(csv_file)[0]
 sql_file = filename_no_ext + '.sql'
 f = open(sql_file, "w")
-print "sql_file: " + sql_file
+print "sql_file: " + sql_file + "\n\n"
 
 # function to run build_sql script on the csv_file using subprocess
 def build_sql(scriptname, csv_file):
+    pdb.set_trace()
     subprocess.call(["./"+scriptname, csv_file], stdout=f)
 
 # build SQL using the build_sql script which corresponds to csv_type
 if csv_type == "barcode, RMST, title":
-    build_sql('build_sql_0307a', csv_file)
+    # build_sql('build_sql_0307a', csv_file)
+    subprocess.call(["./build_sql_0307a", csv_file], stdout=f)
 if csv_type == "RMST, full, size, height, source":
-    build_sql('build_sql_0307b', csv_file)
+    # build_sql('build_sql_0307b', csv_file)
+    subprocess.call(['./build_sql_0307b', csv_file], stdout=f)
 if csv_type == "barcode, title, author, call number":
-    build_sql('build_sql_0314', csv_file)
+    #build_sql('build_sql_0314', csv_file)
+    subprocess.call(['./build_sql_0314', csv_file], stdout=f)
     
 # check if SQL file exists 
 while not os.path.exists(sql_file):
