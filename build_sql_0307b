@@ -1,0 +1,52 @@
+#!/lims/bin/perl
+
+# load bin data into MOSS database
+
+# expects comma separated input: RMST, full, size, height, source
+
+$today = `date +%Y-%m-%d`;
+chomp $today;
+# print "date: $today\n";
+$who = 'Batch Insert';
+
+while (<>) {
+    $lineno++;
+    chomp;
+    $_ =~ s/\r//g;
+    $_ =~ s/ *$//;
+    @a = split /,/;
+    next if $lineno == 1 && 'rmst' eq lc $a[0]; # skip header
+    if ($a[0]) {
+	$rm = $a[0];
+    } else {
+	die "Bad input, no RMST: $_\n\r";
+    }
+    die "Bad input - RMST: $_\n\r" unless $rm =~ /^R\d\dM\d\dS\d\dT\d\d$/;
+    $full = $a[1];
+    if ($full ne 'Y' && $full ne 'N') {
+	die "Bad input - full: $_\n\r";
+    }
+    $size = $a[2];
+    if ($size ne 'A' && $size ne 'B' && $size ne 'C' && $size ne 'D' && $size ne 'E' && $size ne 'M' && $size ne 'O' && $size ne 'P') {
+	die "Bad input - size: $_\n\r";
+    }
+    $height = $a[3];
+    if ($height ne '14' && $height ne '6' && $height ne '10' && $height ne '12' ) {
+	die "Bad input - height: $_\n\r";
+    }
+    $source = $a[4];
+    if ($source ne 'S' && $source ne 'G') {
+	die "Bad input - source: $_\n\r";
+    }
+    print "insert into bins (bin, full, binsize, height, source) values ('$rm', '$full', '$size', $height, '$source');\n";
+}
+
+sub trunc {
+    $in = shift;
+    $num = shift;
+    if (length($in) > $num) {
+	$in = substr($in,0,$num);
+    }
+    $in =~ s/'/''/g;
+    return $in;
+}

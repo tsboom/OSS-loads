@@ -1,0 +1,48 @@
+#!/lims/bin/perl
+
+# load item data into MOSS database
+
+# expects comma separated input: barcode, title, author, call number
+# (First line is skipped if it looks like a header)
+
+$lineno = 0;
+
+$today = `date +%Y-%m-%d`;
+chomp $today;
+# print "date: $today\n";
+$who = 'Batch Insert';
+
+while (<>) {
+    $lineno++;
+    chomp;
+    s/\r$//;
+    s/ *$//;
+    @a = split /,/;
+    next if $lineno == 1 && 'barcode' eq lc $a[0]; # skip header
+    if ($a[0]) {
+	$bar = $a[0];
+    } else {
+	die "Bad input: $_";
+    }
+    $ti = '' unless defined ($ti = $a[1]);
+    $au = '' unless defined ($au = $a[2]);
+    $cn = '' unless defined ($cn = $a[3]);
+    $ti = trunc($ti, 50);
+    $au = trunc($au, 20);
+    $cn = trunc($cn, 35);
+    # print "bar = $bar\n";
+    # print "ti = $ti\n";
+    # print "au = $au\n";
+    # print "cn = $cn\n\n";
+    print "insert into items (barcode, author, title, call_no, vol_hierarchy, on_hold, status, date_created, created_by, date_modified, modified_by, touched) values ('$bar', '$au', '$ti', '$cn', '$cn', 'N', 0, '$today', '$who', '$today', '$who', 'I');\n";
+}
+
+sub trunc {
+    $in = shift;
+    $num = shift;
+    if (length($in) > $num) {
+	$in = substr($in,0,$num);
+    }
+    $in =~ s/'/''/g;
+    return $in;
+}

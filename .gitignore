@@ -1,0 +1,8 @@
+# ignore
+*.sql
+*.csv
+*.load
+oldloads/*
+wc
+xx
+yy
