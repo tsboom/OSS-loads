@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os.path
 import time
+import subprocess
 from subprocess import call, Popen, PIPE
 import csv
 import sys
@@ -77,29 +78,30 @@ def build_sql(scriptname, csv_file):
 
 # build SQL using the build_sql script which corresponds to csv_type
 if csv_type == "barcode, RMST, title":
-    # build_sql('build_sql_0307a', csv_file)
-    subprocess.call(["./build_sql_0307a", csv_file], stdout=f)
+    build_sql('build_sql_0307a', csv_file)
 if csv_type == "RMST, full, size, height, source":
-    # build_sql('build_sql_0307b', csv_file)
-    subprocess.call(['./build_sql_0307b', csv_file], stdout=f)
+    build_sql('build_sql_0307b', csv_file)
 if csv_type == "barcode, title, author, call number":
-    #build_sql('build_sql_0314', csv_file)
-    subprocess.call(['./build_sql_0314', csv_file], stdout=f)
+    build_sql('build_sql_0314', csv_file)
     
 # check if SQL file exists 
 while not os.path.exists(sql_file):
     print "Waiting for SQL file..."
     time.sleep(1)
 
-if os.path.isfile(sql_file):
-    print "Opening SQL Plus"
-    # opens Sql plus session
-    session = Popen(['s+','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+# function to run sql queries in file
+def run_sql_queries():
+    session = Popen(['s+', 'moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     session.stdin.write('set feedback off;')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';')
     # communicate results to stdout
-    stdout, stderr = session.communicate()
-    
+    return session.communicate()
+
+if os.path.isfile(sql_file):
+    print "Opening SQL Plus"
+    # opens Sql plus session
+    query_result, error_messages = run_sql_queries() 
+    pdb.set_trace()
 else:
     raise ValueError("%s isn't a file!" % file_path)
