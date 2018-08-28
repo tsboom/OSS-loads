@@ -91,7 +91,8 @@ while not os.path.exists(sql_file):
 
 # function to run sql queries in file
 def run_sql_queries():
-    session = Popen(['s+', 'moss', '-i'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
+    # s+ is an alias for sqlplus !:1/`get_ora_passwd !:1`
+    session = Popen(['sqlplus', '!:1/`get_ora_passwd !:1`','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     session.stdin.write('set feedback off;')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';')
@@ -102,7 +103,8 @@ if os.path.isfile(sql_file):
     print "Opening SQL Plus"
     # opens Sql plus session
     query_result, error_messages = run_sql_queries() 
-    print error_messages
+    print "---\n\nSQL Plus results: " + str (query_result) + "\n\n"
+    print "---\n\nError messages: " + str(error_messages) + "\n\n"
     pdb.set_trace()
 else:
     raise ValueError("%s isn't a file!" % file_path)
