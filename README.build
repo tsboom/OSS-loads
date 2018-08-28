@@ -1,0 +1,13 @@
+
+build_sql        expects tab separated list of items:
+                 barcode, title, author, call number
+build_sql_0307a  expects comma separated list of items:
+                 barcode, RMST, title
+build_sql_0307b  expects comma separated list of bins:
+                 RMST, full, size, height, source
+build_sql_0314   expects comma separated list of items:
+                 barcode, title, author, call number
+
+NOTE: build routines for comma separated lists do not handle
+fields enclosed in quotes.
+
