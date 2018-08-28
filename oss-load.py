@@ -73,7 +73,6 @@ print "sql_file: " + sql_file + "\n\n"
 
 # function to run build_sql script on the csv_file using subprocess
 def build_sql(scriptname, csv_file):
-    pdb.set_trace()
     subprocess.call(["./"+scriptname, csv_file], stdout=f)
 
 # build SQL using the build_sql script which corresponds to csv_type
@@ -92,8 +91,13 @@ while not os.path.exists(sql_file):
 # function to run sql queries in file
 def run_sql_queries():
     # s+ is an alias for sqlplus !:1/`get_ora_passwd !:1`
-    session = Popen(['sqlplus', '!:1/`get_ora_passwd !:1`','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-    session.stdin.write('set feedback off;')
+    session = Popen(['get_ora_passwd','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, err = session.communicate()
+    pdb.set_trace()
+    password = output
+    login_string = "moss/"+password
+    session = Popen(['sqlplus', login_string], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
+    # session.stdin.write('set feedback off;')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';')
     # communicate results to stdout
