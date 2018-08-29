@@ -93,11 +93,11 @@ def run_sql_queries():
     # s+ is an alias for sqlplus !:1/`get_ora_passwd !:1`
     session = Popen(['get_ora_passwd','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, err = session.communicate()
-    pdb.set_trace()
     password = output
     login_string = "moss/"+password
-    session = Popen(['sqlplus', login_string], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-    # session.stdin.write('set feedback off;')
+    #pdb.set_trace()
+    session = Popen(['sqlplus', '-s', login_string], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    session.stdin.write('set feedback off\n')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';')
     # communicate results to stdout
@@ -107,8 +107,7 @@ if os.path.isfile(sql_file):
     print "Opening SQL Plus"
     # opens Sql plus session
     query_result, error_messages = run_sql_queries() 
-    print "---\n\nSQL Plus results: " + str (query_result) + "\n\n"
-    print "---\n\nError messages: " + str(error_messages) + "\n\n"
-    pdb.set_trace()
+    print "---\n\nSQL Plus results:\n\n" + str (query_result) + "\n\n"
+    print "---\n\nError messages:\n\n" + str(error_messages) + "\n\n"
 else:
     raise ValueError("%s isn't a file!" % file_path)
