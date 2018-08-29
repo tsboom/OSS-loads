@@ -26,7 +26,8 @@ def is_barcode(value):
         return True
 
 def is_rmst(value):
-    regex = r"R[0-9]{2}M[0-9]{2}S[0-9]{2}T[0-9]{2}"
+    #regex = r"R[0-9]{2}M[0-9]{2}S[0-9]{2}T[0-9]{2}"
+    regex = r"Z[0-9]{2}M[0-9]{2}S[0-9]{2}T[0-9]{2}"
     if re.search(regex, value):
         return True
         
