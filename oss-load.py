@@ -101,14 +101,27 @@ def run_sql_queries():
     session.stdin.write('set feedback off\n')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';')
-    # communicate results to stdout
-    return session.communicate()
+    ## communicate results to stdout
+    #return session.communicate(i)
+    return session
 
-if os.path.isfile(sql_file):
+
+
+# make sure SQL file exists, then run the process
+try:
+    if os.path.isfile(sql_file) == False:
+       raise Exception
+except ValueError as e:
+    print('There is an error with the sql file')
+else:
     print "Opening SQL Plus"
-    # opens Sql plus session
-    query_result, error_messages = run_sql_queries() 
+    # opens Sql plus session and saves results
+    query_result, error_messages = run_sql_queries().communicate() 
     print "---\n\nSQL Plus results:\n\n" + str (query_result) + "\n\n"
     print "---\n\nError messages:\n\n" + str(error_messages) + "\n\n"
-else:
-    raise ValueError("%s isn't a file!" % file_path)
+    # commit changes
+    session.stdin.write('commit;')
+finally:
+   print "\n\nExiting the database\n\n"
+   session.stdin.write('quit;')
+
