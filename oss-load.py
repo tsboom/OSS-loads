@@ -107,7 +107,7 @@ def run_sql_queries():
 
 
 
-# make sure SQL file exists, then run the process
+# make sure SQL file exists, then run_sql_queries
 try:
     if os.path.isfile(sql_file) == False:
        raise Exception
@@ -116,12 +116,15 @@ except ValueError as e:
 else:
     print "Opening SQL Plus"
     # opens Sql plus session and saves results
-    query_result, error_messages = run_sql_queries().communicate() 
+    session = run_sql_queries()
+    query_result, error_messages = session.communicate() 
     print "---\n\nSQL Plus results:\n\n" + str (query_result) + "\n\n"
     print "---\n\nError messages:\n\n" + str(error_messages) + "\n\n"
+   
     # commit changes
+    pdb.set_trace() 
     session.stdin.write('commit;')
 finally:
-   print "\n\nExiting the database\n\n"
-   session.stdin.write('quit;')
+    print "\n\nExiting the database\n\n"
+    session.stdin.write('quit;')
 
