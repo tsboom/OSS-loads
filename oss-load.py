@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os.path
+#import cx_oracle
 import time
 import subprocess
 from subprocess import call, Popen, PIPE
@@ -99,13 +100,13 @@ while not os.path.exists(sql_file):
 # function to run sql queries in file
 def run_sql_queries():
     # s+ is an alias for sqlplus !:1/`get_ora_passwd !:1`
-    session = Popen(['get_ora_passwd','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    session  = Popen(['get_ora_passwd','moss'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, err = session.communicate()
     password = output
     login_string = "moss/"+password
     #pdb.set_trace()
     session = Popen(['sqlplus', '-s', login_string], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    session.stdin.write('set feedback off\n')
+    #session.stdin.write('set feedback off\n')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';\n')
     ## communicate results to stdout
@@ -130,17 +131,15 @@ else:
 
     while True:
         line = session.stdout.readline()
-        if line != '':
-            errors.append(line.rstrip())
-            print errors[-1]
-            session.stdin.write('\n')
-        else:
+        print line
+        errors.append(line.rstrip())
+        if line.rstrip() == '':
  	    print "break happened"
-            pdb.set_trace()
  	    break
-    
+        
     # commit changes
+    print "\n\nabout to commit" 
     session.stdin.write('commit;\n')
-finally:
+    print "\n\nSuccessfully commited"    
     print "\n\nExiting the database\n\n"
     session.stdin.write('quit;\n')
