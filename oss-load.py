@@ -109,8 +109,6 @@ def run_sql_queries():
     #session.stdin.write('set feedback off\n')
     print "Executing SQL file..."
     session.stdin.write('@'+ filename_no_ext +';\n')
-    ## communicate results to stdout
-    #return session.communicate(i)
     return session
 
 
@@ -131,11 +129,12 @@ else:
 
     while True:
         line = session.stdout.readline()
-        print line
         errors.append(line.rstrip())
         if line.rstrip() == '':
- 	    print "break happened"
+ 	    print "end of line was reached"
  	    break
+    
+    print errors
         
     # commit changes
     print "\n\nabout to commit" 
